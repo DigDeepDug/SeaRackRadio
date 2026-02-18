@@ -4,18 +4,11 @@
 <nav>
   <h1>Waveform Radio</h1>
   <ul>
+    <li><a href="{{ url_for('radio.index') }}">Home</a>
+    <li><a href="{{ url_for('radio.admin') }}">Admin</a>
     {% if g.user %}
-      <li><a href="{{ url_for('radio.admin') }}">Admin</a>
-    {% else %}
-      <li><a href="{{ url_for('auth.login') }}">Admin</a>
-    {% endif %}
-    <!-- {% if g.user %}
-      <li><span>{{ g.user['username'] }}</span>
       <li><a href="{{ url_for('auth.logout') }}">Log Out</a>
-    {% else %}
-      <li><a href="{{ url_for('auth.register') }}">Register</a>
-      <li><a href="{{ url_for('auth.login') }}">Log In</a>
-    {% endif %} -->
+    {% endif %}
   </ul>
 </nav>
 <section class="content">
