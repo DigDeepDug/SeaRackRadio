@@ -12,9 +12,21 @@
   <p>Admin page</p>
 
   <div>
-    <audio controls preload="metadata">
-      <source src="static/mp3files/im-the-one-2015-remaster.mp3" type="audio/mpeg">
-    </audio>
+    <ul>
+      {% for track in tracks %}
+        <audio controls preload="metadata">
+          <source src="{{ track }}" type="audio/mpeg">
+        </audio>
+      {% endfor %}
+    </ul>
   </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    <label>Select MP3:</label><br><br>
+    <input type="file" name="file" accept=".mp3,audio/mpeg" required>
+    <br><br>
+
+    <button type="submit">Upload</button>
+  </form>
 
 {% endblock %}

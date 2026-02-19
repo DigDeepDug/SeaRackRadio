@@ -1,12 +1,18 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, redirect, render_template, request, url_for, current_app
 )
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
+from mutagen.mp3 import MP3
 
 from flaskr.auth import login_required
 from flaskr.db import get_db
 
+import os
+
 bp = Blueprint('radio', __name__)
+
+
 
 @bp.route('/')
 def index():
@@ -20,10 +26,62 @@ def index():
 
     return render_template('radio/index.html')
 
-@bp.route('/admin')
+
+ALLOWED_EXTENSIONS = {"mp3"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@bp.route('/admin', methods=('GET', 'POST'))
 @login_required
 def admin():
-    return render_template('radio/admin.html')
+
+    db = get_db()
+
+    if request.method == 'POST':
+        if "file" not in request.files:
+            return "No file part", 400
+
+        file = request.files["file"]
+
+        if file.filename == "":
+            return "No selected file", 400
+        
+        if file and allowed_file(file.filename):
+
+            filename = secure_filename(file.filename)
+
+            save_path = os.path.join(current_app.config["TRACK_FOLDER"], filename)
+            print("ZZZZZZZZZZZZZ", save_path)
+            file.save(save_path)
+
+            try:
+                audio = MP3(save_path)
+                duration = audio.info.length
+                print("Duration:", duration)
+            except Exception:
+                os.remove(save_path)
+                return "Invalid MP3 file", 400
+            
+            db.execute(
+                "INSERT INTO track (filename) VALUES (?)",
+                (filename,)
+            )
+
+            db.commit()
+            
+        else:
+            return "Invalid file type", 400
+        
+    tracks = db.execute(
+        f'SELECT CONCAT(\'{current_app.config["TRACK_FOLDER"]}/\', filename)'
+        'FROM track'
+    ).fetchall()
+
+
+
+    return render_template('radio/admin.html', tracks=tracks)
 
 # @bp.route('/')
 # def index():
