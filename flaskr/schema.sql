@@ -10,5 +10,10 @@ CREATE TABLE user (
 
 CREATE TABLE track (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  filename TEXT UNIQUE NOT NULL
+  filename TEXT UNIQUE NOT NULL,
+  title TEXT,
+  url TEXT NOT NULL, -- what the browser uses (ex: /static/uploads/tracks/<filename>)
+  image_filename TEXT,
+  image_url TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );

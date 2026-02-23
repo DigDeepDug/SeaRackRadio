@@ -43,6 +43,13 @@ def admin():
         if "file" not in request.files:
             return "No file part", 400
 
+        result = request.form
+
+        title = result["title"]
+
+        if title == "":
+            return "Must have title", 400
+
         file = request.files["file"]
 
         if file.filename == "":
@@ -63,23 +70,27 @@ def admin():
             except Exception:
                 os.remove(save_path)
                 return "Invalid MP3 file", 400
-            
-            db.execute(
-                "INSERT INTO track (filename) VALUES (?)",
-                (filename,)
-            )
 
-            db.commit()
+            from sqlite3 import IntegrityError
+
+            url = f"/static/uploads/tracks/{filename}"
+
+            try:
+                db.execute(
+                    "INSERT INTO track (title, filename, url) VALUES (?, ?, ?)",
+                    (title, filename, url)
+                )
+                db.commit()
+                db.commit()
+            except IntegrityError:
+                return "File already exists", 400
             
         else:
             return "Invalid file type", 400
         
     tracks = db.execute(
-        f'SELECT CONCAT(\'{current_app.config["TRACK_FOLDER"]}/\', filename)'
-        'FROM track'
+        "SELECT * FROM track ORDER BY created_at DESC"
     ).fetchall()
-
-
 
     return render_template('radio/admin.html', tracks=tracks)
 

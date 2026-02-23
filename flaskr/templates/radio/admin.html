@@ -5,6 +5,8 @@
   {% if g.user %}
     <a class="action" href="{{ url_for('hello') }}">New</a>
   {% endif %}
+
+
 {% endblock %}
 
 
@@ -14,19 +16,34 @@
   <div>
     <ul>
       {% for track in tracks %}
-        <audio controls preload="metadata">
-          <source src="{{ track }}" type="audio/mpeg">
+        <h3>{{ track["title"] }}</h3>
+
+        <audio controls>
+          <source src="{{ track["url"] }}">
         </audio>
       {% endfor %}
     </ul>
   </div>
 
   <form method="POST" enctype="multipart/form-data">
-    <label>Select MP3:</label><br><br>
+    <label>Select MP3:</label>
     <input type="file" name="file" accept=".mp3,audio/mpeg" required>
+    <br><br>
+    <label>Enter title:</label>
+    <input type="title" name="title" required>
     <br><br>
 
     <button type="submit">Upload</button>
   </form>
+
+  <script>
+    document.querySelectorAll("audio").forEach(audio => {
+        audio.addEventListener("play", () => {
+            document.querySelectorAll("audio").forEach(other => {
+                if (other !== audio) other.pause();
+            });
+        });
+    });
+  </script>
 
 {% endblock %}
